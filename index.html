@@ -5,13 +5,21 @@
     <title>Search Trump's Truth Social posts (CSV)</title>
     <!-- Use Papa Parse to load and parse the CSV -->
     <script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
+
+    <style>.single-result {
+      border: 1px solid #ccc;
+      margin: 5px;
+      padding: 10px;
+      background-color: #f9f9f9;
+    }</style>
   </head>
   <body>
     <h1>Search Trump's Truth Social posts</h1>
-    <p>Complete up to 2025-03-28</p>
+    <p>Complete up to 2025-03-28. Warning: This loads a 100MB CSV file locally for quick filtering. Your browser may choke!</p>
 
     <!-- Search input field -->
     <input id="searchBox" type="text" placeholder="Type to search..." />
+    <p>Number of matches: <span id="resultsCount">0</span></p>
     <div id="results"></div>
 
     <script>
@@ -38,10 +46,13 @@
           });
         });
 
+        // Update the matched count
+        document.getElementById('resultsCount').textContent = filtered.length;
+
         // Display matches
         let html = '';
         filtered.forEach(row => {
-          html += `<pre>${JSON.stringify(row, null, 2)}</pre>`;
+          html += `<div class="single-result">${JSON.stringify(row, null, 2)}</div>`;
         });
         document.getElementById('results').innerHTML = html;
       });
