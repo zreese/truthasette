@@ -2,17 +2,49 @@
 <html>
   <head>
     <meta charset="utf-8" />
-    <title>Datasette Lite on GitHub Pages</title>
-    <script type="module" src="https://unpkg.com/datasette-lite@0.19.2/dist/datasette-lite.umd.js"></script>
+    <title>Search Trump's Truth Social posts (CSV)</title>
+    <!-- Use Papa Parse to load and parse the CSV -->
+    <script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
   </head>
   <body>
     <h1>Search Trump's Truth Social posts</h1>
     <p>Complete up to 2025-03-28</p>
 
+    <!-- Search input field -->
+    <input id="searchBox" type="text" placeholder="Type to search..." />
+    <div id="results"></div>
+
     <script>
-      window.datasetteLite = {
-        defaultDatabaseUrl: "statuses_realDonaldTrump.db"
-      };
+      let dataRows = [];
+
+      // Parse the CSV file directly from the same folder
+      Papa.parse("statuses_realDonaldTrump.csv", {
+        download: true,
+        header: true, // if your CSV has a header row
+        complete: function(results) {
+          dataRows = results.data;
+        }
+      });
+
+      const searchBox = document.getElementById('searchBox');
+
+      // Listen for input changes to filter results
+      searchBox.addEventListener('input', () => {
+        const query = searchBox.value.toLowerCase();
+        const filtered = dataRows.filter(row => {
+          // Convert all row values to strings, check if query is included
+          return Object.values(row).some(value => {
+            return value && value.toString().toLowerCase().includes(query);
+          });
+        });
+
+        // Display matches
+        let html = '';
+        filtered.forEach(row => {
+          html += `<pre>${JSON.stringify(row, null, 2)}</pre>`;
+        });
+        document.getElementById('results').innerHTML = html;
+      });
     </script>
   </body>
 </html>
