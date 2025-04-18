@@ -27,7 +27,7 @@
       let currentMatchCount = 0; // Initialize match counter
 
       // Parse the CSV file directly from the same folder
-      Papa.parse("statuses_realDonaldTrump.csv", {
+      Papa.parse(location.origin + "/statuses_realDonaldTrump.csv", {
         download: true,
         worker: true,
         stream: true,
