@@ -24,64 +24,37 @@
 
     <script>
       let dataRows = [];
-      let currentMatchCount = 0; // Initialize match counter
 
       // Parse the CSV file directly from the same folder
-      Papa.parse(location.origin + "/statuses_realDonaldTrump.csv", {
+      Papa.parse("statuses_realDonaldTrump.csv", {
         download: true,
-        worker: true,
-        stream: true,
         header: true, // if your CSV has a header row
-        chunk: function(results) {
-          // Append chunk data to the main array - This might become redundant if step handles everything
-          // Consider removing chunk if step logic is sufficient
-          dataRows = dataRows.concat(results.data);
-        },
-        step: function(results, parser) {
-          const query = document.getElementById('searchBox').value.toLowerCase();
-          const row = results.data;
-
-          // Check if the current row matches the query
-          const isMatch = Object.values(row).some(value => {
-            return value && value.toString().toLowerCase().includes(query);
-          });
-
-          if (isMatch) {
-            currentMatchCount++;
-            document.getElementById('resultsCount').textContent = currentMatchCount;
-            const rowHtml = `<div class="single-result">${JSON.stringify(row, null, 2)}</div>`;
-            document.getElementById('results').innerHTML += rowHtml; // Append row HTML
-          }
-        },
-        complete: function() {
-          console.log("CSV parsing complete.");
+        complete: function(results) {
+          dataRows = results.data;
         }
       });
 
       const searchBox = document.getElementById('searchBox');
 
-      // Listen for input changes to re-filter results *after* initial load/parse
+      // Listen for input changes to filter results
       searchBox.addEventListener('input', () => {
         const query = searchBox.value.toLowerCase();
-        // Clear previous results and reset counter
-        document.getElementById('results').innerHTML = '';
-        currentMatchCount = 0;
-        document.getElementById('resultsCount').textContent = '0';
-
-        // Re-filter the already parsed dataRows
-        dataRows.forEach(row => {
-          const isMatch = Object.values(row).some(value => {
+        const filtered = dataRows.filter(row => {
+          // Convert all row values to strings, check if query is included
+          return Object.values(row).some(value => {
             return value && value.toString().toLowerCase().includes(query);
           });
-
-          if (isMatch) {
-            currentMatchCount++;
-            const rowHtml = `<div class="single-result">${JSON.stringify(row, null, 2)}</div>`;
-            document.getElementById('results').innerHTML += rowHtml; // Append row HTML
-          }
         });
-        // Update the count after filtering is complete
-        document.getElementById('resultsCount').textContent = currentMatchCount;
+
+        // Update the matched count
+        document.getElementById('resultsCount').textContent = filtered.length;
+
+        // Display matches
+        let html = '';
+        filtered.forEach(row => {
+          html += `<div class="single-result">${JSON.stringify(row, null, 2)}</div>`;
+        });
+        document.getElementById('results').innerHTML = html;
       });
     </script>
   </body>
